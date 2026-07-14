@@ -1,0 +1,166 @@
+.daily-weather__header {
+  padding: 18px 22px 0;
+}
+
+.daily-weather__tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.daily-weather__tab {
+  position: relative;
+  padding: 0 4px 14px;
+  border: 0;
+  background: transparent;
+  color: #8090aa;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.daily-weather__tab + .daily-weather__tab {
+  margin-left: 18px;
+}
+
+.daily-weather__tab:hover {
+  color: #1768d7;
+}
+
+.daily-weather__tab--active {
+  color: #10265b;
+}
+
+.daily-weather__tab--active::after {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background-color: #1768d7;
+  content: "";
+}
+
+.daily-weather-list {
+  display: grid;
+}
+
+.daily-weather__item {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 1.2fr)
+    60px
+    minmax(130px, 1fr)
+    auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 22px;
+  border: 0;
+  background: transparent;
+  color: #10265b;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.daily-weather__item + .daily-weather__item {
+  border-top: 1px solid #e2e8f0;
+}
+
+.daily-weather__item:hover {
+  background-color: #f7faff;
+}
+
+.daily-weather__item--selected {
+  background-color: #edf5ff;
+  box-shadow: inset 4px 0 0 #1768d7;
+}
+
+.daily-weather__item:focus-visible {
+  outline: 2px solid #1768d7;
+  outline-offset: -2px;
+}
+
+.daily-weather__date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.daily-weather__date strong {
+  font-size: 15px;
+}
+
+.daily-weather__date time {
+  color: #7c8ca8;
+  font-size: 13px;
+}
+
+.daily-weather__icon {
+  font-size: 31px;
+  text-align: center;
+}
+
+.daily-weather__description {
+  font-size: 14px;
+}
+
+.daily-weather__temperatures {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.daily-weather__temperatures strong:first-child {
+  color: #1768d7;
+}
+
+.daily-weather__temperatures strong:last-child {
+  color: #f97316;
+}
+
+.daily-weather__temperatures span {
+  color: #a0aec0;
+}
+
+@media (max-width: 700px) {
+  .daily-weather__item {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .daily-weather__description {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .daily-weather__header {
+    padding-inline: 16px;
+  }
+
+  .daily-weather__tabs {
+    justify-content: space-between;
+  }
+
+  .daily-weather__tab {
+    font-size: 14px;
+  }
+
+  .daily-weather__tab + .daily-weather__tab {
+    margin-left: 0;
+  }
+
+  .daily-weather__item {
+    gap: 10px;
+    padding-inline: 16px;
+  }
+
+  .daily-weather__icon {
+    font-size: 26px;
+  }
+}
