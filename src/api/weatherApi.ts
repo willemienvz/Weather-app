@@ -4,6 +4,7 @@ import type {
   OpenMeteoCurrentWeatherResponse,
 } from "../types/weather";
 import type { ReverseGeocodingResponse } from "../types/ReverseGeocoding";
+import { getCachedData, setCachedData } from "../utils/weatherCache";
 
 const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
@@ -12,6 +13,15 @@ export async function getCurrentWeather(
   latitude: number,
   longitude: number,
 ): Promise<OpenMeteoCurrentWeatherResponse> {
+  const cacheKey = buildWeatherCacheKey(latitude, longitude);
+
+  const cachedWeather =
+    getCachedData<OpenMeteoCurrentWeatherResponse>(cacheKey);
+
+  if (cachedWeather) {
+    return cachedWeather;
+  }
+
   const parameters = new URLSearchParams({
     latitude: latitude.toString(),
     longitude: longitude.toString(),
@@ -59,7 +69,11 @@ export async function getCurrentWeather(
     );
   }
 
-  return response.json() as Promise<OpenMeteoCurrentWeatherResponse>;
+  const weather = (await response.json()) as OpenMeteoCurrentWeatherResponse;
+
+  setCachedData(cacheKey, weather);
+
+  return weather;
 }
 
 export async function searchLocation(
@@ -102,7 +116,7 @@ export async function getLocationName(
   });
 
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?${params}`,
+    `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
   );
 
   if (!response.ok) {
@@ -123,4 +137,9 @@ export async function getLocationName(
   );
 
   return parts.length > 0 ? parts.join(", ") : "Current Location";
+}
+
+function buildWeatherCacheKey(latitude: number, longitude: number): string {
+  return `weather:${latitude.toFixed(3)}:${longitude.toFixed(3)}`;
+  //rounding was added here to avoid unnessary calls when cordinates are close to each other
 }

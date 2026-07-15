@@ -97,11 +97,9 @@ The layout adapts to different screen sizes using CSS Grid, Flexbox, and respons
 
 Animations and transitions were added to improve visual feedback and create a more engaging user experience while maintaining usability.
 
-## Trade-Offs
+## Architecture discisions
 
-### Weather Data Provider
-
-The application uses Open-Meteo APIs for weather retrieval. Open-Meteo was selected because it provides free access to current, forecast, and historical weather data required by the application.
+React Query was considered but omitted because the application only performs a small number of requests and browser storage was sufficient for caching requirements.
 
 ### Client-Side Persistence
 
@@ -120,3 +118,7 @@ The application uses Open-Meteo APIs for weather retrieval. Open-Meteo was selec
 ## Notes
 
 Open-Meteo was used instead of WeatherStack because forecast and historical weather endpoints were required for the exercise and were readily available through the chosen provider. The overall application behaviour remains aligned with the project requirements. With WeatherStack the forecast api's are not included in the free tier.
+
+## AI Usage
+
+AI-assisted tools (ChatGPT) were used during development as a productivity aid for brainstorming approaches, reviewing code structure, troubleshooting issues, and generating documentation. All application architecture, implementation decisions, component design, state management, API integration, styling, testing, and final code review were completed and validated by me, Willemien. Any AI-generated suggestions were evaluated, adapted where appropriate, and manually integrated into the solution.
