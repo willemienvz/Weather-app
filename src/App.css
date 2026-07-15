@@ -8,7 +8,7 @@
 .app-container {
   width: 100%;
   display: flex;
-  background-color: white;
+  background-color: var(--white);
   border-radius: 15px;
   flex-direction: column;
   padding: 20px;
@@ -32,23 +32,15 @@
   border-radius: 8px;
 }
 
-.weather-message,
-.weather-error {
-  margin: 24px 0;
-  padding: 20px;
-  border-radius: 14px;
-  text-align: center;
-}
-
 .weather-message {
   background-color: rgba(255, 255, 255, 0.75);
-  color: #64748b;
+  color: var(--primary);
 }
 
 .weather-error {
-  border: 1px solid #fecaca;
-  background-color: #fef2f2;
-  color: #b91c1c;
+  border: 1px solid var(--error-light);
+  background-color: var(--error-light);
+  color: var(--error);
 }
 .save-location-wrapper {
   display: flex;
@@ -60,7 +52,7 @@
   border: 1px solid var(--primary);
   border-radius: 8px;
   background-color: var(--primary);
-  color: #fff;
+  color: var(--white);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -68,4 +60,28 @@
 
 .save-location-button:hover {
   opacity: 0.9;
+}
+
+@media (max-width: 1200px) {
+  .weather-container {
+    flex-direction: column;
+  }
+
+  .weather-details {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .save-location-wrapper {
+    justify-content: flex-start;
+  }
+
+  .app {
+    padding: 0;
+  }
+
+  .app-container {
+    border-radius: 0;
+  }
 }

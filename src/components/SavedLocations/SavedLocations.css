@@ -1,8 +1,5 @@
 .saved-locations {
-  padding: 24px;
-  border-radius: 16px;
-  background-color: #fff;
-  box-shadow: 0 8px 24px rgb(28 63 110 / 10%);
+  margin-top: 20px;
 }
 
 .saved-locations-header {
@@ -13,24 +10,18 @@
 }
 
 .saved-locations-header h2 {
-  margin: 0;
   color: var(--primary);
   font-size: 18px;
 }
 
 .saved-locations-list {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  display: flex;
+  gap: 15px;
 }
 
 .saved-location-card {
   position: relative;
-  min-width: 0;
-  border: 1px solid #e3ebf5;
-  border-radius: 12px;
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgb(28 63 110 / 8%);
+  width: 300px;
 }
 
 .saved-location-content {
@@ -40,15 +31,16 @@
   width: 100%;
   padding: 18px;
   border: none;
-  border-radius: inherit;
   background: none;
   color: inherit;
   text-align: left;
   cursor: pointer;
+  transition: 0.3s all;
+  border-bottom: 2px solid transparent;
 }
 
 .saved-location-content:hover {
-  background-color: #f7faff;
+  border-color: var(--primary);
 }
 
 .saved-location-content img {
@@ -76,23 +68,21 @@
   right: 8px;
   border: none;
   background: none;
-  color: #7d8ba3;
+  color: var(--primary);
   font-size: 20px;
   cursor: pointer;
 }
 
 .remove-location-button:hover {
-  color: #d93025;
+  color: var(--error);
 }
 
 @media (max-width: 900px) {
   .saved-locations-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: column;
   }
-}
 
-@media (max-width: 550px) {
-  .saved-locations-list {
-    grid-template-columns: 1fr;
+  .saved-location-card {
+    width: 100%;
   }
 }

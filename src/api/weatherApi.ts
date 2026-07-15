@@ -3,6 +3,7 @@ import type {
   GeocodingResult,
   OpenMeteoCurrentWeatherResponse,
 } from "../types/weather";
+import type { ReverseGeocodingResponse } from "../types/ReverseGeocoding";
 
 const WEATHER_API_URL = "https://api.open-meteo.com/v1/forecast";
 const GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
@@ -87,4 +88,39 @@ export async function searchLocation(
   }
 
   return location;
+}
+
+export async function getLocationName(
+  latitude: number,
+  longitude: number,
+): Promise<string> {
+  const params = new URLSearchParams({
+    lat: latitude.toString(),
+    lon: longitude.toString(),
+    format: "jsonv2",
+    addressdetails: "1",
+  });
+
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?${params}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Unable to determine your location name.");
+  }
+
+  const data = (await response.json()) as ReverseGeocodingResponse;
+
+  const city =
+    data.address?.city ??
+    data.address?.town ??
+    data.address?.village ??
+    data.address?.suburb ??
+    data.address?.municipality;
+
+  const parts = [city, data.address?.state, data.address?.country].filter(
+    Boolean,
+  );
+
+  return parts.length > 0 ? parts.join(", ") : "Current Location";
 }

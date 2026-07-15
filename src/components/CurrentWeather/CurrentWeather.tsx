@@ -2,82 +2,18 @@ import type {
   ForecastDay,
   OpenMeteoCurrentWeatherResponse,
 } from "../../types/weather";
+import {
+  formatDateOnly,
+  formatDateTime,
+  formatTime,
+} from "../../utils/dateFormatters";
+import { getWeatherCondition } from "../../utils/weatherConditions";
 import "./CurrentWeather.css";
 
 interface CurrentWeatherProps {
   weather: OpenMeteoCurrentWeatherResponse;
   locationName: string;
   selectedDay: ForecastDay | null;
-}
-
-function getWeatherDescription(code: number): string {
-  switch (code) {
-    case 0:
-      return "Clear sky";
-
-    case 1:
-      return "Mainly clear";
-
-    case 2:
-      return "Partly cloudy";
-
-    case 3:
-      return "Overcast";
-
-    case 45:
-    case 48:
-      return "Fog";
-
-    case 61:
-    case 63:
-    case 65:
-      return "Rain";
-
-    case 80:
-    case 81:
-    case 82:
-      return "Rain showers";
-
-    case 95:
-      return "Thunderstorm";
-
-    default:
-      return "Unknown";
-  }
-}
-
-function getWeatherIcon(code: number): string {
-  switch (code) {
-    case 0:
-      return "☀️";
-
-    case 1:
-    case 2:
-      return "⛅";
-
-    case 3:
-      return "☁️";
-
-    case 45:
-    case 48:
-      return "🌫️";
-
-    case 61:
-    case 63:
-    case 65:
-      return "🌧️";
-
-    case 80:
-    case 81:
-    case 82:
-      return "🌦️";
-
-    case 95:
-      return "⛈️";
-
-    default:
-      return "☀️";
-  }
 }
 
 export function CurrentWeather({
@@ -95,13 +31,17 @@ export function CurrentWeather({
 
   const windSpeed = selectedDay?.windSpeed ?? weather.current.wind_speed_10m;
 
+  const condition = getWeatherCondition(weatherCode);
+
   const displayDate = selectedDay
-    ? new Date(`${selectedDay.date}T12:00:00`)
-    : new Date(weather.current.time);
+    ? formatDateOnly(selectedDay.date)
+    : formatDateTime(weather.current.time);
+
+  const displayTime = selectedDay ? null : formatTime(weather.current.time);
 
   return (
     <section className="current-weather">
-      <div className="current-weather__overlay" />
+      <div className="current-weather__overlay" aria-hidden="true" />
 
       <div className="current-weather__content">
         <div className="current-weather__summary">
@@ -109,17 +49,8 @@ export function CurrentWeather({
             <h1>{locationName}</h1>
 
             <p>
-              {displayDate.toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })}
-
-              {!selectedDay &&
-                ` · ${displayDate.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}`}
+              {displayDate}
+              {displayTime && ` · ${displayTime}`}
             </p>
           </div>
 
@@ -127,9 +58,9 @@ export function CurrentWeather({
             <span
               className="current-weather__icon"
               role="img"
-              aria-label={getWeatherDescription(weatherCode)}
+              aria-label={condition.description}
             >
-              {getWeatherIcon(weatherCode)}
+              {condition.icon}
             </span>
 
             <p className="current-weather__temperature">
@@ -139,10 +70,11 @@ export function CurrentWeather({
           </div>
 
           <div className="current-weather__condition">
-            <h2>{getWeatherDescription(weatherCode)}</h2>
+            <h2>{condition.description}</h2>
 
             <p>
-              Feels like {Math.round(feelsLike)}°C
+              {selectedDay ? "Feels like up to" : "Feels like"}{" "}
+              {Math.round(feelsLike)}°C
               {selectedDay &&
                 ` · Low ${Math.round(selectedDay.temperatureMin)}°C`}
             </p>
@@ -170,7 +102,7 @@ export function CurrentWeather({
             <dd>{Math.round(windSpeed)} km/h</dd>
           </div>
 
-          {selectedDay && (
+          {selectedDay ? (
             <>
               <div className="current-weather__detail">
                 <dt>
@@ -190,9 +122,7 @@ export function CurrentWeather({
                 <dd>{formatTime(selectedDay.sunset)}</dd>
               </div>
             </>
-          )}
-
-          {!selectedDay && (
+          ) : (
             <>
               <div className="current-weather__detail">
                 <dt>
@@ -226,10 +156,4 @@ export function CurrentWeather({
       </div>
     </section>
   );
-}
-function formatTime(value: string): string {
-  return new Date(value).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }

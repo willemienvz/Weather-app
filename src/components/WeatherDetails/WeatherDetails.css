@@ -19,8 +19,8 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #ddf6df;
-  color: #247f35;
+  background: var(--gray-light);
+  color: var(--success);
   display: flex;
   place-items: center;
   font-size: 24px;
@@ -72,7 +72,7 @@
 }
 
 .air-quality-header span {
-  color: #64748b;
+  color: var(--primary);
   font-size: 14px;
 }
 
@@ -90,12 +90,12 @@
   flex: 1;
   height: 8px;
   border-radius: 999px;
-  background: #e2e8f0;
+  background: var(--gray-light);
   transition: all 0.3s ease;
 }
 
 .air-quality-bar__segment--active {
-  background: #22c55e;
+  background: var(--success);
 }
 
 .detail-card__header {
@@ -107,13 +107,13 @@
 
 .detail-card__eyebrow {
   margin: 0 0 6px;
-  color: #7c8ca8;
+  color: var(--primary);
   font-size: 13px;
 }
 
 .detail-card__header h3 {
   margin: 0;
-  color: #10265b;
+  color: var(--primary);
   font-size: 18px;
 }
 
@@ -137,7 +137,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--white);
 }
 
 .moon-details {
@@ -155,13 +155,13 @@
 
 .moon-details span,
 .moon-illumination__header span {
-  color: #7c8ca8;
+  color: var(--primary-light);
   font-size: 13px;
 }
 
 .moon-details strong,
 .moon-illumination__header strong {
-  color: #10265b;
+  color: var(--primary);
   font-size: 16px;
 }
 
@@ -180,7 +180,7 @@
   height: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e6edf6;
+  background: var(--gray-light);
 }
 
 .moon-illumination__fill {
@@ -220,7 +220,7 @@
 }
 
 .detail span {
-  color: #7c8ca8;
+  color: var(--primary-light);
   font-size: 13px;
 }
 
@@ -236,12 +236,25 @@
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background-color: #fff7d6;
+  background-color: var(--gray-light);
+  animation: sun-pulse 3s ease-in-out infinite;
 }
 
 .sun-path img {
   width: 36px;
   height: 36px;
+  animation: sun-float 4s ease-in-out infinite;
+}
+
+@keyframes sun-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
 }
 
 .sunset-icon {
@@ -259,7 +272,7 @@
 }
 
 .weather-detail-value span {
-  color: #7c8ca8;
+  color: var(--primary);
   font-size: 14px;
 }
 
@@ -269,7 +282,7 @@
   margin-top: 16px;
   overflow: hidden;
   border-radius: 999px;
-  background-color: #e6edf6;
+  background-color: var(--gray-light);
 }
 
 .uv-progress__fill,
@@ -284,7 +297,7 @@
 }
 
 .humidity-progress__fill {
-  background-color: #4298e8;
+  background-color: var(--primary-light);
 }
 
 @media (max-width: 600px) {

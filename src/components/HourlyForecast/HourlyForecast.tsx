@@ -3,6 +3,10 @@ import type {
   OpenMeteoCurrentWeatherResponse,
 } from "../../types/weather";
 import "./HourlyForecast.css";
+import {
+  getWeatherCondition,
+  getWeatherIcon,
+} from "../../utils/weatherConditions";
 
 interface HourlyForecastProps {
   weather: OpenMeteoCurrentWeatherResponse;
@@ -35,7 +39,8 @@ export function HourlyForecast({ weather, selectedDay }: HourlyForecastProps) {
 
       <div className="hourly-forecast__list">
         {hourlyForecast.map((hour) => {
-          const description = getWeatherDescription(hour.weatherCode);
+          const condition = getWeatherCondition(hour.weatherCode);
+          const icon = getWeatherIcon(hour.weatherCode, hour.isDay);
 
           return (
             <div key={hour.time} className="hourly-forecast__item">
@@ -44,9 +49,9 @@ export function HourlyForecast({ weather, selectedDay }: HourlyForecastProps) {
               <span
                 className="hourly-forecast__icon"
                 role="img"
-                aria-label={description}
+                aria-label={condition.description}
               >
-                {getWeatherIcon(hour.weatherCode, hour.isDay)}
+                {icon}
               </span>
 
               <strong>
@@ -133,62 +138,6 @@ function formatHour(dateTime: string): string {
     hour: "numeric",
     hour12: true,
   }).format(new Date(dateTime));
-}
-
-function getWeatherIcon(code: number, isDay: boolean): string {
-  if (code === 0) {
-    return isDay ? "☀️" : "🌙";
-  }
-
-  if ([1, 2].includes(code)) {
-    return isDay ? "🌤️" : "☁️";
-  }
-
-  if (code === 3) {
-    return "☁️";
-  }
-
-  if ([45, 48].includes(code)) {
-    return "🌫️";
-  }
-
-  if ([51, 53, 55, 56, 57].includes(code)) {
-    return "🌦️";
-  }
-
-  if ([61, 63, 65, 66, 67].includes(code)) {
-    return "🌧️";
-  }
-
-  if ([71, 73, 75, 77, 85, 86].includes(code)) {
-    return "🌨️";
-  }
-
-  if ([80, 81, 82].includes(code)) {
-    return "🌦️";
-  }
-
-  if ([95, 96, 99].includes(code)) {
-    return "⛈️";
-  }
-
-  return isDay ? "☀️" : "🌙";
-}
-
-function getWeatherDescription(code: number): string {
-  if (code === 0) return "Clear sky";
-  if (code === 1) return "Mainly clear";
-  if (code === 2) return "Partly cloudy";
-  if (code === 3) return "Overcast";
-  if ([45, 48].includes(code)) return "Fog";
-  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
-  if ([61, 63, 65, 66, 67].includes(code)) return "Rain";
-  if ([71, 73, 75, 77].includes(code)) return "Snow";
-  if ([80, 81, 82].includes(code)) return "Rain showers";
-  if ([85, 86].includes(code)) return "Snow showers";
-  if ([95, 96, 99].includes(code)) return "Thunderstorm";
-
-  return "Unknown weather";
 }
 
 function formatDayTitle(date: string): string {

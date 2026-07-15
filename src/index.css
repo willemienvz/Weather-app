@@ -12,6 +12,13 @@
   --accent: #fb720b;
 
   --main-background: #d7e7fa;
+  --gray-light: #e2e8f0;
+  --white: #fff;
+
+  --error: #b91c1c;
+  --error-light: #fecaca;
+  --success: #065f46;
+  --success-light: #a7f3d0;
 }
 
 .primary-button-icon {

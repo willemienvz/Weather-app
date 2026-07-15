@@ -5,7 +5,7 @@
 .daily-weather__tabs {
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--gray-light);
 }
 
 .daily-weather__tab {
@@ -13,7 +13,7 @@
   padding: 0 4px 14px;
   border: 0;
   background: transparent;
-  color: #8090aa;
+  color: var(--primary);
   font: inherit;
   font-size: 16px;
   font-weight: 600;
@@ -25,11 +25,11 @@
 }
 
 .daily-weather__tab:hover {
-  color: #1768d7;
+  color: var(--primary-light);
 }
 
 .daily-weather__tab--active {
-  color: #10265b;
+  color: var(--primary);
 }
 
 .daily-weather__tab--active::after {
@@ -39,7 +39,7 @@
   left: 0;
   height: 3px;
   border-radius: 999px 999px 0 0;
-  background-color: #1768d7;
+  background-color: var(--primary-light);
   content: "";
 }
 
@@ -61,27 +61,29 @@
   padding: 12px 22px;
   border: 0;
   background: transparent;
-  color: #10265b;
+  color: var(--primary);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  transition: 0.3s all;
 }
 
 .daily-weather__item + .daily-weather__item {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--gray-light);
 }
 
 .daily-weather__item:hover {
-  background-color: #f7faff;
+  background-color: var(--gray-light);
+  transform: translateY(-2px);
 }
 
 .daily-weather__item--selected {
-  background-color: #edf5ff;
-  box-shadow: inset 4px 0 0 #1768d7;
+  background-color: var(--gray-light);
+  box-shadow: inset 4px 0 0 var(--primary-light);
 }
 
 .daily-weather__item:focus-visible {
-  outline: 2px solid #1768d7;
+  outline: 2px solid var(--primary-light);
   outline-offset: -2px;
 }
 
@@ -96,7 +98,7 @@
 }
 
 .daily-weather__date time {
-  color: #7c8ca8;
+  color: var(--primary);
   font-size: 13px;
 }
 
@@ -116,16 +118,13 @@
   white-space: nowrap;
 }
 
-.daily-weather__temperatures strong:first-child {
-  color: #1768d7;
-}
-
-.daily-weather__temperatures strong:last-child {
-  color: #f97316;
+.daily-weather__temperatures span:first-child {
+  color: var(--primary-light);
 }
 
 .daily-weather__temperatures span {
-  color: #a0aec0;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 @media (max-width: 700px) {

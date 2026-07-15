@@ -3,6 +3,9 @@ import type {
   ForecastDay,
   OpenMeteoCurrentWeatherResponse,
 } from "../../types/weather";
+import { parseDateOnly } from "../../utils/dateFormatters";
+import { getWeatherCondition } from "../../utils/weatherConditions";
+import { mapDailyWeather } from "../../utils/weatherTransformers";
 import "./DailyWeather.css";
 
 type WeatherTab = "forecast" | "history";
@@ -20,42 +23,23 @@ export function DailyWeather({
 }: DailyWeatherProps) {
   const [activeTab, setActiveTab] = useState<WeatherTab>("forecast");
 
-  const daily = weather.daily;
-
-  const allDays: ForecastDay[] = daily.time.map((date, index) => ({
-    index,
-    date,
-    weatherCode: daily.weather_code[index],
-    temperatureMax: daily.temperature_2m_max[index],
-    temperatureMin: daily.temperature_2m_min[index],
-    apparentTemperatureMax: daily.apparent_temperature_max[index],
-    apparentTemperatureMin: daily.apparent_temperature_min[index],
-    precipitationProbability: daily.precipitation_probability_max[index],
-    windSpeed: daily.wind_speed_10m_max[index],
-    sunrise: daily.sunrise[index],
-    sunset: daily.sunset[index],
-  }));
+  const allDays = mapDailyWeather(weather);
 
   const historyDays = allDays.slice(0, 3);
-  const forecastDays = allDays.slice(3);
+  const forecastDays = allDays.slice(3, 10);
 
   const displayedDays = activeTab === "forecast" ? forecastDays : historyDays;
 
   return (
     <section className="daily-weather">
       <div className="daily-weather__header">
-        <div
-          className="daily-weather__tabs"
-          role="tablist"
-          aria-label="Daily weather"
-        >
+        <div className="daily-weather__tabs">
           <button
             type="button"
-            role="tab"
-            aria-selected={activeTab === "forecast"}
             className={`daily-weather__tab ${
               activeTab === "forecast" ? "daily-weather__tab--active" : ""
             }`}
+            aria-pressed={activeTab === "forecast"}
             onClick={() => setActiveTab("forecast")}
           >
             7-Day Forecast
@@ -63,11 +47,10 @@ export function DailyWeather({
 
           <button
             type="button"
-            role="tab"
-            aria-selected={activeTab === "history"}
             className={`daily-weather__tab ${
               activeTab === "history" ? "daily-weather__tab--active" : ""
             }`}
+            aria-pressed={activeTab === "history"}
             onClick={() => setActiveTab("history")}
           >
             3-Day History
@@ -77,8 +60,12 @@ export function DailyWeather({
 
       <div className="daily-weather__list">
         {displayedDays.map((day) => {
-          const date = new Date(`${day.date}T12:00:00`);
+          const date = parseDateOnly(day.date);
+          const condition = getWeatherCondition(day.weatherCode);
           const isSelected = selectedDay?.date === day.date;
+
+          const high = Math.round(day.temperatureMax);
+          const low = Math.round(day.temperatureMin);
 
           return (
             <button
@@ -108,19 +95,22 @@ export function DailyWeather({
               <span
                 className="daily-weather__icon"
                 role="img"
-                aria-label={getWeatherDescription(day.weatherCode)}
+                aria-label={condition.description}
               >
-                {getWeatherIcon(day.weatherCode)}
+                {condition.icon}
               </span>
 
               <span className="daily-weather__description">
-                {getWeatherDescription(day.weatherCode)}
+                {condition.description}
               </span>
 
-              <div className="daily-weather__temperatures">
-                <strong>{Math.round(day.temperatureMin)}°</strong>
+              <div
+                className="daily-weather__temperatures"
+                aria-label={`High ${high} degrees, low ${low} degrees`}
+              >
+                <span>{high}°</span>
                 <span>/</span>
-                <strong>{Math.round(day.temperatureMax)}°</strong>
+                <span>{low}°</span>
               </div>
             </button>
           );
@@ -128,34 +118,4 @@ export function DailyWeather({
       </div>
     </section>
   );
-}
-
-function getWeatherDescription(code: number): string {
-  if (code === 0) return "Clear sky";
-  if (code === 1) return "Mainly clear";
-  if (code === 2) return "Partly cloudy";
-  if (code === 3) return "Overcast";
-  if ([45, 48].includes(code)) return "Fog";
-  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
-  if ([61, 63, 65, 66, 67].includes(code)) return "Rain";
-  if ([71, 73, 75, 77].includes(code)) return "Snow";
-  if ([80, 81, 82].includes(code)) return "Rain showers";
-  if ([85, 86].includes(code)) return "Snow showers";
-  if ([95, 96, 99].includes(code)) return "Thunderstorm";
-
-  return "Unknown";
-}
-
-function getWeatherIcon(code: number): string {
-  if (code === 0) return "☀️";
-  if ([1, 2].includes(code)) return "🌤️";
-  if (code === 3) return "☁️";
-  if ([45, 48].includes(code)) return "🌫️";
-  if ([51, 53, 55, 56, 57].includes(code)) return "🌦️";
-  if ([61, 63, 65, 66, 67].includes(code)) return "🌧️";
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return "🌨️";
-  if ([80, 81, 82].includes(code)) return "🌦️";
-  if ([95, 96, 99].includes(code)) return "⛈️";
-
-  return "🌤️";
 }

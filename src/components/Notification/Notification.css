@@ -1,0 +1,38 @@
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  width: min(400px, calc(100% - 40px));
+  padding: 16px;
+
+  border-radius: 10px;
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.notification-error {
+  background-color: var(--error-light);
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+.notification-success {
+  background-color: var(--success-light);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.notification-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 20px;
+}

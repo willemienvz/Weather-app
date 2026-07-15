@@ -40,8 +40,24 @@
   gap: 10px;
   border: none;
   cursor: pointer;
+  transition: 0.3s all;
+  border: 1px solid transparent;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+.location-button:hover {
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .location-button img {
   width: 25px;
+}
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
 }

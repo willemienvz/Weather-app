@@ -1,148 +1,92 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import { getCurrentWeather, searchLocation } from "./api/weatherApi";
 import { CurrentWeather } from "./components/CurrentWeather/CurrentWeather";
-import { Header } from "./components/Header/Header";
-import { WeatherDetails } from "./components/WeatherDetails/WeatherDetails";
-import type {
-  ForecastDay,
-  OpenMeteoCurrentWeatherResponse,
-} from "./types/weather";
-import { HourlyForecast } from "./components/HourlyForecast/HourlyForecast";
 import { DailyWeather } from "./components/DailyWeather/DailyWeather";
-import { SavedLocations } from "./components/SavedLocations/SavedLocations";
-import type { SavedLocation } from "./types/SavedLocation";
+import { Header } from "./components/Header/Header";
+import { HourlyForecast } from "./components/HourlyForecast/HourlyForecast";
 import { Loader } from "./components/Loader/Loader";
-
-interface WeatherData {
-  locationName: string;
-  latitude: number;
-  longitude: number;
-  weather: OpenMeteoCurrentWeatherResponse;
-}
-
-const SAVED_LOCATIONS_KEY = "weather-app-saved-locations";
+import { Notification } from "./components/Notification/Notification";
+import { SavedLocations } from "./components/SavedLocations/SavedLocations";
+import { WeatherDetails } from "./components/WeatherDetails/WeatherDetails";
+import { useBodyScrollLock } from "./hooks/useBodyScrollLock";
+import { useSavedLocations } from "./hooks/useSavedLocations";
+import { useWeather } from "./hooks/useWeather";
+import type { SavedLocation } from "./types/SavedLocation";
+import { getLocationName } from "./api/weatherApi";
 
 export function App() {
-  const [selectedDay, setSelectedDay] = useState<ForecastDay | null>(null);
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [savedLocations, setSavedLocations] = useState<SavedLocation[]>(() => {
-    const storedLocations = localStorage.getItem(SAVED_LOCATIONS_KEY);
+  const {
+    selectedDay,
+    weatherData,
+    loading,
+    notification,
+    setNotification,
+    setSelectedDay,
+    searchWeather,
+    loadWeatherByCoordinates,
+  } = useWeather();
 
-    if (!storedLocations) {
-      return [];
-    }
+  const { savedLocations, saveLocation, updateTemperature, removeLocation } =
+    useSavedLocations();
 
-    try {
-      return JSON.parse(storedLocations) as SavedLocation[];
-    } catch {
-      return [];
-    }
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem(SAVED_LOCATIONS_KEY, JSON.stringify(savedLocations));
-  }, [savedLocations]);
-
-  useEffect(() => {
-    if (!loading) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [loading]);
-
-  const handleSearch = async (searchTerm: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const location = await searchLocation(searchTerm);
-
-      const weatherResponse = await getCurrentWeather(
-        location.latitude,
-        location.longitude,
-      );
-
-      setWeatherData({
-        locationName: formatLocationName(location),
-        latitude: location.latitude,
-        longitude: location.longitude,
-        weather: weatherResponse,
-      });
-      setSelectedDay(null);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to load weather for this location.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  useBodyScrollLock(loading);
 
   const handleUseLocation = () => {
-    setError(null);
+    setNotification(null);
 
     if (!navigator.geolocation) {
-      setError("Your browser does not support location services.");
+      setNotification({
+        message: "Your browser does not support location services.",
+        type: "error",
+      });
+
       return;
     }
 
-    setLoading(true);
-
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+      async ({ coords }) => {
+        const { latitude, longitude } = coords;
 
         try {
-          const weatherResponse = await getCurrentWeather(latitude, longitude);
+          const locationName = await getLocationName(latitude, longitude);
 
-          setWeatherData({
-            locationName: "Current Location",
+          await loadWeatherByCoordinates(latitude, longitude, locationName);
+        } catch {
+          await loadWeatherByCoordinates(
             latitude,
             longitude,
-            weather: weatherResponse,
-          });
-        } catch (error) {
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Unable to load weather information.",
+            "Current Location",
           );
-        } finally {
-          setLoading(false);
         }
       },
       (positionError) => {
-        setLoading(false);
-
         switch (positionError.code) {
           case positionError.PERMISSION_DENIED:
-            setError(
-              "Location permission was denied. Please allow location access and try again.",
-            );
+            setNotification({
+              message:
+                "Location permission was denied. Please allow location access and try again.",
+              type: "error",
+            });
             break;
 
           case positionError.POSITION_UNAVAILABLE:
-            setError("Your location is currently unavailable.");
+            setNotification({
+              message: "Your location is currently unavailable.",
+              type: "error",
+            });
             break;
 
           case positionError.TIMEOUT:
-            setError("The location request took too long. Please try again.");
+            setNotification({
+              message: "The location request took too long. Please try again.",
+              type: "error",
+            });
             break;
 
           default:
-            setError("Unable to determine your current location.");
+            setNotification({
+              message: "Unable to determine your current location.",
+              type: "error",
+            });
         }
       },
       {
@@ -158,88 +102,56 @@ export function App() {
       return;
     }
 
-    const alreadySaved = savedLocations.some(
-      (location) =>
-        location.latitude === weatherData.latitude &&
-        location.longitude === weatherData.longitude,
-    );
+    const saved = saveLocation(weatherData);
 
-    if (alreadySaved) {
-      setError("This location has already been saved.");
+    if (!saved) {
+      setNotification({
+        message: "This location has already been saved.",
+        type: "error",
+      });
+
       return;
     }
 
-    const savedLocation: SavedLocation = {
-      id: `${weatherData.latitude}-${weatherData.longitude}`,
-      name: weatherData.locationName,
-      latitude: weatherData.latitude,
-      longitude: weatherData.longitude,
-      temperature: weatherData.weather.current.temperature_2m,
-    };
-
-    setSavedLocations((currentLocations) => [
-      ...currentLocations,
-      savedLocation,
-    ]);
+    setNotification({
+      message: `${weatherData.locationName} was saved successfully.`,
+      type: "success",
+    });
   };
 
   const handleSelectSavedLocation = async (location: SavedLocation) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const weatherResponse = await getCurrentWeather(
-        location.latitude,
-        location.longitude,
-      );
-
-      setWeatherData({
-        locationName: location.name,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        weather: weatherResponse,
-      });
-
-      setSavedLocations((currentLocations) =>
-        currentLocations.map((savedLocation) =>
-          savedLocation.id === location.id
-            ? {
-                ...savedLocation,
-                temperature: weatherResponse.current.temperature_2m,
-              }
-            : savedLocation,
-        ),
-      );
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to load this saved location.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRemoveSavedLocation = (id: string) => {
-    setSavedLocations((currentLocations) =>
-      currentLocations.filter((location) => location.id !== id),
+    const result = await loadWeatherByCoordinates(
+      location.latitude,
+      location.longitude,
+      location.name,
     );
+
+    if (result) {
+      updateTemperature(location.id, result.weather.current.temperature_2m);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
     <main className="app">
       {loading && <Loader message="Loading weather for your location..." />}
+
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <div className="app-container">
-        <Header onSearch={handleSearch} onUseLocation={handleUseLocation} />
+        <Header onSearch={searchWeather} onUseLocation={handleUseLocation} />
 
-        {error && (
-          <div className="weather-error" role="alert">
-            {error}
-          </div>
-        )}
-
-        {!loading && !weatherData && !error && (
+        {!loading && !weatherData && (
           <div className="weather-message">
             Search for a city or use your current location.
           </div>
@@ -256,6 +168,7 @@ export function App() {
                 Save location
               </button>
             </div>
+
             <CurrentWeather
               selectedDay={selectedDay}
               locationName={weatherData.locationName}
@@ -286,23 +199,11 @@ export function App() {
         <SavedLocations
           locations={savedLocations}
           onSelect={handleSelectSavedLocation}
-          onRemove={handleRemoveSavedLocation}
+          onRemove={removeLocation}
         />
       </div>
     </main>
   );
-}
-
-function formatLocationName(location: {
-  name: string;
-  admin1?: string;
-  country?: string;
-}): string {
-  const parts = [location.name, location.admin1, location.country].filter(
-    Boolean,
-  );
-
-  return parts.join(", ");
 }
 
 export default App;
